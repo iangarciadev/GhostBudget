@@ -1,6 +1,7 @@
 import flet as ft
 from state import AppState
 from controllers.category_ctrl import add_category, edit_category, remove_category
+from i18n import t
 
 MATERIAL_ICONS = [
     "restaurant", "directions_car", "home", "health_and_safety",
@@ -18,13 +19,17 @@ COLORS = [
     ("#F06292", "Rosa"),      ("#FFB300", "Amarelo"),
 ]
 
-TYPE_OPTIONS = [
-    ft.dropdown.Option(key="expense", text="Despesa"),
-    ft.dropdown.Option(key="income",  text="Receita"),
-    ft.dropdown.Option(key="all",     text="Ambos"),
-]
 
-TYPE_LABEL = {"expense": "Despesa", "income": "Receita", "all": "Ambos"}
+def _type_options() -> list:
+    return [
+        ft.dropdown.Option(key="expense", text=t("categories.type.expense")),
+        ft.dropdown.Option(key="income",  text=t("categories.type.income")),
+        ft.dropdown.Option(key="all",     text=t("categories.type.both")),
+    ]
+
+
+def _type_label(type_key: str) -> str:
+    return t(f"categories.type.{type_key}" if type_key != "all" else "categories.type.both")
 
 
 class CategoriesView(ft.Column):
@@ -40,9 +45,9 @@ class CategoriesView(ft.Column):
             ft.Container(
                 content=ft.Row(
                     [
-                        ft.Text("Categorias", size=22, weight=ft.FontWeight.BOLD),
+                        ft.Text(t("categories.title"), size=22, weight=ft.FontWeight.BOLD),
                         ft.ElevatedButton(
-                            "Nova categoria",
+                            t("categories.new"),
                             icon=ft.Icons.ADD,
                             on_click=lambda e: _CategoryForm(
                                 self._page, self._state, self._on_change
@@ -60,6 +65,7 @@ class CategoriesView(ft.Column):
     def _build_list(self):
         items = []
         for cat in self._state.categories:
+            type_key = cat.type if cat.type in ("expense", "income") else "all"
             items.append(
                 ft.Container(
                     content=ft.Row(
@@ -76,7 +82,7 @@ class CategoriesView(ft.Column):
                                 [
                                     ft.Text(cat.name, weight=ft.FontWeight.W_500, size=14),
                                     ft.Text(
-                                        TYPE_LABEL.get(cat.type, cat.type),
+                                        _type_label(type_key),
                                         size=12,
                                         color=ft.Colors.ON_SURFACE_VARIANT,
                                     ),
@@ -86,13 +92,13 @@ class CategoriesView(ft.Column):
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.EDIT_OUTLINED,
-                                tooltip="Editar",
+                                tooltip=t("categories.edit"),
                                 data=cat,
                                 on_click=self._edit,
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.DELETE_OUTLINE,
-                                tooltip="Excluir",
+                                tooltip=t("categories.delete"),
                                 icon_color=ft.Colors.ON_SURFACE_VARIANT,
                                 data=cat.id,
                                 on_click=self._delete,
@@ -126,26 +132,26 @@ class _CategoryForm:
         self._existing = existing
 
         self._name = ft.TextField(
-            label="Nome", value=existing.name if existing else "", expand=True
+            label=t("categories.form.name"), value=existing.name if existing else "", expand=True
         )
         self._type = ft.Dropdown(
-            label="Tipo", options=TYPE_OPTIONS, width=160,
+            label=t("categories.form.type"), options=_type_options(), width=160,
             value=existing.type if existing else "expense",
         )
         self._color = ft.Dropdown(
-            label="Cor",
+            label=t("categories.form.color"),
             options=[ft.dropdown.Option(key=c, text=lbl) for c, lbl in COLORS],
             value=existing.color if existing else COLORS[0][0],
             width=160,
         )
         self._icon = ft.Dropdown(
-            label="Ícone",
+            label=t("categories.form.icon"),
             options=[ft.dropdown.Option(key=i, text=i) for i in MATERIAL_ICONS],
             value=existing.icon if existing else MATERIAL_ICONS[0],
             width=200,
         )
 
-        title = "Editar categoria" if existing else "Nova categoria"
+        title = t("categories.dialog.edit") if existing else t("categories.dialog.new")
         self._dlg = ft.AlertDialog(
             title=ft.Text(title),
             content=ft.Column(
@@ -156,8 +162,8 @@ class _CategoryForm:
                 tight=True, spacing=12, width=460,
             ),
             actions=[
-                ft.TextButton("Cancelar", on_click=lambda e: self._close()),
-                ft.ElevatedButton("Salvar", on_click=self._save),
+                ft.TextButton(t("categories.cancel"), on_click=lambda e: self._close()),
+                ft.ElevatedButton(t("categories.save"), on_click=self._save),
             ],
         )
 
@@ -170,7 +176,7 @@ class _CategoryForm:
     def _save(self, e):
         name = self._name.value.strip()
         if not name:
-            self._name.error_text = "Informe um nome"
+            self._name.error_text = t("categories.error.name_required")
             self._name.update()
             return
 

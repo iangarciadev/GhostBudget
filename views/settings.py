@@ -1,14 +1,16 @@
 import flet as ft
 from state import AppState
 import controllers.sync_ctrl as sync_ctrl
+import i18n
 
 
 class SettingsView(ft.Column):
-    def __init__(self, page: ft.Page, state: AppState, on_change):
+    def __init__(self, page: ft.Page, state: AppState, on_change, on_lang_change):
         super().__init__(expand=True, scroll=ft.ScrollMode.AUTO, spacing=0)
         self._page = page
         self._state = state
         self._on_change = on_change
+        self._on_lang_change = on_lang_change
         self._status_text = ft.Text("", color=ft.Colors.GREEN_600)
         self._build()
 
@@ -17,16 +19,16 @@ class SettingsView(ft.Column):
 
         self.controls = [
             ft.Container(
-                content=ft.Text("Configurações", size=22, weight=ft.FontWeight.BOLD),
+                content=ft.Text(i18n.t("settings.title"), size=22, weight=ft.FontWeight.BOLD),
                 padding=ft.padding.symmetric(horizontal=24, vertical=16),
             ),
             ft.Divider(height=1),
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text("Google Drive", size=16, weight=ft.FontWeight.W_600),
+                        ft.Text(i18n.t("settings.gdrive.section"), size=16, weight=ft.FontWeight.W_600),
                         ft.Text(
-                            "Sincronize seu banco de dados entre dispositivos usando o Google Drive.",
+                            i18n.t("settings.gdrive.description"),
                             color=ft.Colors.ON_SURFACE_VARIANT,
                             size=13,
                         ),
@@ -39,7 +41,7 @@ class SettingsView(ft.Column):
                                     border_radius=5,
                                 ),
                                 ft.Text(
-                                    "Conta vinculada" if linked else "Nenhuma conta vinculada",
+                                    i18n.t("settings.gdrive.linked") if linked else i18n.t("settings.gdrive.not_linked"),
                                     size=13,
                                 ),
                             ],
@@ -49,18 +51,18 @@ class SettingsView(ft.Column):
                         ft.Row(
                             [
                                 ft.OutlinedButton(
-                                    "Vincular conta Google",
+                                    i18n.t("settings.gdrive.link_btn"),
                                     icon=ft.Icons.LINK,
                                     on_click=self._link,
                                 ),
                                 ft.ElevatedButton(
-                                    "Enviar backup",
+                                    i18n.t("settings.gdrive.upload_btn"),
                                     icon=ft.Icons.CLOUD_UPLOAD_OUTLINED,
                                     on_click=self._upload,
                                     disabled=not linked,
                                 ),
                                 ft.ElevatedButton(
-                                    "Restaurar backup",
+                                    i18n.t("settings.gdrive.restore_btn"),
                                     icon=ft.Icons.CLOUD_DOWNLOAD_OUTLINED,
                                     on_click=self._download,
                                     disabled=not linked,
@@ -73,11 +75,31 @@ class SettingsView(ft.Column):
                         self._status_text,
                         ft.Container(height=4),
                         ft.Text(
-                            "Para usar o Google Drive, coloque o arquivo credentials.json "
-                            "(baixado do Google Cloud Console) na pasta raiz do GhostBudget.",
+                            i18n.t("settings.gdrive.hint"),
                             size=12,
                             color=ft.Colors.ON_SURFACE_VARIANT,
                             italic=True,
+                        ),
+                    ],
+                    spacing=6,
+                ),
+                padding=24,
+            ),
+            ft.Divider(height=1),
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(i18n.t("settings.language.section"), size=16, weight=ft.FontWeight.W_600),
+                        ft.Container(height=4),
+                        ft.Dropdown(
+                            label=i18n.t("settings.language.label"),
+                            width=220,
+                            value=i18n.get_current_language(),
+                            options=[
+                                ft.dropdown.Option("en", i18n.t("lang.en")),
+                                ft.dropdown.Option("pt", i18n.t("lang.pt")),
+                            ],
+                            on_change=self._change_language,
                         ),
                     ],
                     spacing=6,
@@ -114,6 +136,10 @@ class SettingsView(ft.Column):
             self._on_change()
         except Exception as ex:
             self._set_status(str(ex), error=True)
+
+    def _change_language(self, e):
+        i18n.load_language(e.control.value)
+        self._on_lang_change()
 
     def refresh(self):
         self._build()

@@ -1,6 +1,7 @@
 import flet as ft
 from state import AppState
 import models.stats as stats_model
+from i18n import t
 
 
 def _fmt(value: float) -> str:
@@ -43,15 +44,15 @@ class DashboardView(ft.Column):
                 content=ft.Column(
                     [
                         ft.Text(
-                            f"Resumo — {self._state.current_month}",
+                            t("dashboard.title", month=self._state.current_month),
                             size=22,
                             weight=ft.FontWeight.BOLD,
                         ),
                         ft.Row(
                             [
-                                _summary_card("Receitas", s["income"], ft.Colors.GREEN_600),
-                                _summary_card("Despesas", s["expense"], ft.Colors.RED_600),
-                                _summary_card("Saldo", s["balance"], balance_color),
+                                _summary_card(t("dashboard.income"), s["income"], ft.Colors.GREEN_600),
+                                _summary_card(t("dashboard.expense"), s["expense"], ft.Colors.RED_600),
+                                _summary_card(t("dashboard.balance"), s["balance"], balance_color),
                             ],
                             spacing=16,
                         ),
@@ -64,7 +65,7 @@ class DashboardView(ft.Column):
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text("Despesas por categoria", size=16, weight=ft.FontWeight.W_600),
+                        ft.Text(t("dashboard.by_category"), size=16, weight=ft.FontWeight.W_600),
                         *self._build_category_bars(by_cat, s["expense"]),
                     ],
                     spacing=10,
@@ -75,7 +76,7 @@ class DashboardView(ft.Column):
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text("Tendência mensal", size=16, weight=ft.FontWeight.W_600),
+                        ft.Text(t("dashboard.trend"), size=16, weight=ft.FontWeight.W_600),
                         *self._build_trend(trend),
                     ],
                     spacing=10,
@@ -86,7 +87,7 @@ class DashboardView(ft.Column):
 
     def _build_category_bars(self, by_cat: list[dict], total_expense: float) -> list:
         if not by_cat:
-            return [ft.Text("Sem despesas no mês.", color=ft.Colors.ON_SURFACE_VARIANT)]
+            return [ft.Text(t("dashboard.no_expenses"), color=ft.Colors.ON_SURFACE_VARIANT)]
         max_val = max(c["total"] for c in by_cat)
         bars = []
         for cat in by_cat:
@@ -122,7 +123,7 @@ class DashboardView(ft.Column):
 
     def _build_trend(self, trend: list[dict]) -> list:
         if not trend:
-            return [ft.Text("Sem dados históricos.", color=ft.Colors.ON_SURFACE_VARIANT)]
+            return [ft.Text(t("dashboard.no_data"), color=ft.Colors.ON_SURFACE_VARIANT)]
 
         max_val = max(max(m["income"], m["expense"]) for m in trend) or 1
         bar_height = 100
@@ -160,9 +161,9 @@ class DashboardView(ft.Column):
         legend = ft.Row(
             [
                 ft.Container(width=12, height=12, bgcolor=ft.Colors.GREEN_400, border_radius=2),
-                ft.Text("Receita", size=12),
+                ft.Text(t("dashboard.type_income"), size=12),
                 ft.Container(width=12, height=12, bgcolor=ft.Colors.RED_400, border_radius=2),
-                ft.Text("Despesa", size=12),
+                ft.Text(t("dashboard.type_expense"), size=12),
             ],
             spacing=6,
         )

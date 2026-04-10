@@ -2,6 +2,7 @@ import flet as ft
 from datetime import date
 from state import AppState
 from controllers.transaction_ctrl import add_transaction, remove_transaction
+from i18n import t
 
 
 def _fmt_amount(amount: float, type_: str) -> str:
@@ -11,11 +12,11 @@ def _fmt_amount(amount: float, type_: str) -> str:
 
 def _category_name(state: AppState, category_id: int | None) -> str:
     if category_id is None:
-        return "Sem categoria"
+        return t("transactions.no_category")
     for c in state.categories:
         if c.id == category_id:
             return c.name
-    return "Sem categoria"
+    return t("transactions.no_category")
 
 
 def _category_color(state: AppState, category_id: int | None) -> str:
@@ -40,9 +41,9 @@ class TransactionsView(ft.Column):
             ft.Container(
                 content=ft.Row(
                     [
-                        ft.Text("Lançamentos", size=22, weight=ft.FontWeight.BOLD),
+                        ft.Text(t("transactions.title"), size=22, weight=ft.FontWeight.BOLD),
                         ft.ElevatedButton(
-                            "Novo lançamento",
+                            t("transactions.new"),
                             icon=ft.Icons.ADD,
                             on_click=self._open_form,
                         ),
@@ -60,7 +61,7 @@ class TransactionsView(ft.Column):
             return [
                 ft.Container(
                     content=ft.Text(
-                        "Nenhum lançamento neste mês.",
+                        t("transactions.empty"),
                         color=ft.Colors.ON_SURFACE_VARIANT,
                         text_align=ft.TextAlign.CENTER,
                     ),
@@ -104,7 +105,7 @@ class TransactionsView(ft.Column):
                             ft.IconButton(
                                 icon=ft.Icons.DELETE_OUTLINE,
                                 icon_color=ft.Colors.ON_SURFACE_VARIANT,
-                                tooltip="Excluir",
+                                tooltip=t("transactions.delete"),
                                 data=tx.id,
                                 on_click=self._delete,
                             ),
@@ -135,25 +136,24 @@ class _TransactionForm:
         self._state = state
         self._on_change = on_change
 
-        self._amount = ft.TextField(label="Valor (R$)", keyboard_type=ft.KeyboardType.NUMBER, width=200)
-        self._desc = ft.TextField(label="Descrição (opcional)", expand=True)
+        self._amount = ft.TextField(label=t("transactions.form.amount"), keyboard_type=ft.KeyboardType.NUMBER, width=200)
+        self._desc = ft.TextField(label=t("transactions.form.desc"), expand=True)
         self._date_field = ft.TextField(
-            label="Data", value=date.today().isoformat(), width=160,
-            hint_text="AAAA-MM-DD",
+            label=t("transactions.form.date"), value=date.today().isoformat(), width=160,
+            hint_text=t("transactions.form.date_hint"),
         )
         self._type_toggle = ft.SegmentedButton(
             selected={"expense"},
             segments=[
-                ft.Segment(value="expense", label=ft.Text("Despesa")),
-                ft.Segment(value="income", label=ft.Text("Receita")),
+                ft.Segment(value="expense", label=ft.Text(t("transactions.form.type_expense"))),
+                ft.Segment(value="income", label=ft.Text(t("transactions.form.type_income"))),
             ],
         )
         expense_cats = [c for c in state.categories if c.type in ("expense", "all")]
         income_cats  = [c for c in state.categories if c.type in ("income", "all")]
-        all_cats = state.categories
 
         self._category = ft.Dropdown(
-            label="Categoria",
+            label=t("transactions.form.category"),
             options=[ft.dropdown.Option(key=str(c.id), text=c.name) for c in expense_cats],
             width=220,
         )
@@ -171,7 +171,7 @@ class _TransactionForm:
         self._type_toggle.on_change = on_type_change
 
         self._dlg = ft.AlertDialog(
-            title=ft.Text("Novo lançamento"),
+            title=ft.Text(t("transactions.dialog.title")),
             content=ft.Column(
                 [
                     self._type_toggle,
@@ -183,8 +183,8 @@ class _TransactionForm:
                 width=500,
             ),
             actions=[
-                ft.TextButton("Cancelar", on_click=lambda e: self._close()),
-                ft.ElevatedButton("Salvar", on_click=self._save),
+                ft.TextButton(t("transactions.cancel"), on_click=lambda e: self._close()),
+                ft.ElevatedButton(t("transactions.save"), on_click=self._save),
             ],
         )
 
@@ -198,7 +198,7 @@ class _TransactionForm:
         try:
             amount = float(self._amount.value.replace(",", "."))
         except (ValueError, AttributeError):
-            self._amount.error_text = "Valor inválido"
+            self._amount.error_text = t("transactions.invalid_amount")
             self._amount.update()
             return
 

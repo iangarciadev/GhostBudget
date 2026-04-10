@@ -14,6 +14,7 @@ class AppState:
     categories: list[Category] = field(default_factory=list)
     summary: dict = field(default_factory=lambda: {"income": 0.0, "expense": 0.0, "balance": 0.0})
     gdrive_linked: bool = False
+    language: str = "en"
 
     def reload(self) -> None:
         self.transactions = tx_model.get_all(self.current_month)

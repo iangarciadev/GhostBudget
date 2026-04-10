@@ -1,4 +1,5 @@
 import flet as ft
+import i18n
 from models.database import init_db
 from state import AppState
 from components.navbar import NavBar
@@ -18,8 +19,10 @@ def main(page: ft.Page):
     page.window.min_height = 500
     page.padding = 0
 
+    i18n.init()
     init_db()
     state = AppState()
+    state.language = i18n.get_current_language()
     state.reload()
 
     navbar = NavBar(page)
@@ -28,6 +31,12 @@ def main(page: ft.Page):
     def on_data_change():
         """Chamado por qualquer view que altere dados — re-renderiza a view atual."""
         state.reload()
+        render(page.route)
+
+    def on_lang_change():
+        """Chamado quando o usuário troca o idioma — atualiza navbar e re-renderiza."""
+        state.language = i18n.get_current_language()
+        navbar.refresh()
         render(page.route)
 
     def render(route: str):
@@ -49,7 +58,7 @@ def main(page: ft.Page):
                 )
             case "/settings":
                 content_area.controls.append(
-                    SettingsView(page, state, on_data_change)
+                    SettingsView(page, state, on_data_change, on_lang_change)
                 )
             case _:
                 content_area.controls.append(
@@ -76,8 +85,7 @@ def main(page: ft.Page):
         )
     )
 
-    page.go("/")
-    page.update()
+    render(page.route or "/")
 
 
 if __name__ == "__main__":

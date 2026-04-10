@@ -1,4 +1,5 @@
 import flet as ft
+from i18n import t
 
 
 class NavBar(ft.NavigationRail):
@@ -16,29 +17,37 @@ class NavBar(ft.NavigationRail):
             min_width=80,
             bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
             on_change=on_change,
-            destinations=[
-                ft.NavigationRailDestination(
-                    icon=ft.Icons.DASHBOARD_OUTLINED,
-                    selected_icon=ft.Icons.DASHBOARD,
-                    label="Dashboard",
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.Icons.RECEIPT_LONG_OUTLINED,
-                    selected_icon=ft.Icons.RECEIPT_LONG,
-                    label="Lançamentos",
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.Icons.LABEL_OUTLINED,
-                    selected_icon=ft.Icons.LABEL,
-                    label="Categorias",
-                ),
-                ft.NavigationRailDestination(
-                    icon=ft.Icons.SETTINGS_OUTLINED,
-                    selected_icon=ft.Icons.SETTINGS,
-                    label="Config",
-                ),
-            ],
+            destinations=self._build_destinations(),
         )
+
+    def _build_destinations(self) -> list:
+        return [
+            ft.NavigationRailDestination(
+                icon=ft.Icons.DASHBOARD_OUTLINED,
+                selected_icon=ft.Icons.DASHBOARD,
+                label=t("nav.dashboard"),
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.RECEIPT_LONG_OUTLINED,
+                selected_icon=ft.Icons.RECEIPT_LONG,
+                label=t("nav.transactions"),
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.LABEL_OUTLINED,
+                selected_icon=ft.Icons.LABEL,
+                label=t("nav.categories"),
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.SETTINGS_OUTLINED,
+                selected_icon=ft.Icons.SETTINGS,
+                label=t("nav.settings"),
+            ),
+        ]
+
+    def refresh(self) -> None:
+        """Rebuild destination labels with the current language."""
+        self.destinations = self._build_destinations()
+        self.update()
 
     def sync_route(self, route: str) -> None:
         self.selected_index = self._route_to_index(route)
