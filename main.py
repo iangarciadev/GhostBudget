@@ -1,5 +1,6 @@
 import flet as ft
 import i18n
+from paths import get_assets_dir
 from models.database import init_db
 from state import AppState
 from components.navbar import NavBar
@@ -20,7 +21,7 @@ def main(page: ft.Page):
     page.window.min_width = 700
     page.window.min_height = 500
     page.padding = 0
-    page.window.icon = "logo.png"
+    page.window.icon = "logo.ico"
 
     i18n.init()
     init_db()
@@ -100,4 +101,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="assets")
+    ft.app(target=main, assets_dir=str(get_assets_dir()))

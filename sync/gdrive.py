@@ -2,15 +2,15 @@
 Google Drive sync para o GhostBudget.
 
 Requer um projeto no Google Cloud Console com a Drive API habilitada e
-um arquivo credentials.json (OAuth 2.0 Desktop App) na raiz do projeto.
+um arquivo credentials.json (OAuth 2.0 Desktop App) em %APPDATA%\GhostBudget\.
 """
-from pathlib import Path
 import os
+from paths import get_data_dir, get_credentials_file
 
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-CREDENTIALS_FILE = Path(__file__).parent.parent / "credentials.json"
-TOKEN_FILE = Path(__file__).parent.parent / "data" / "gdrive_token.json"
-DB_FILE = Path(__file__).parent.parent / "data" / "budget.db"
+CREDENTIALS_FILE = get_credentials_file()
+TOKEN_FILE = get_data_dir() / "gdrive_token.json"
+DB_FILE = get_data_dir() / "budget.db"
 DRIVE_FOLDER_NAME = "GhostBudget"
 DRIVE_FILE_NAME = "budget.db"
 
@@ -30,8 +30,8 @@ class GDriveSync:
 
         if not CREDENTIALS_FILE.exists():
             raise FileNotFoundError(
-                "Arquivo credentials.json não encontrado.\n"
-                "Baixe-o do Google Cloud Console e coloque na raiz do projeto."
+                f"Arquivo credentials.json não encontrado.\n"
+                f"Baixe-o do Google Cloud Console e coloque em:\n{CREDENTIALS_FILE}"
             )
 
         flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)

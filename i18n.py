@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
+from paths import get_locales_dir, get_data_dir
 
-_LOCALES_DIR = Path(__file__).parent / "locales"
-_CONFIG_PATH = Path(__file__).parent / "data" / "config.json"
+_LOCALES_DIR = get_locales_dir()
+_CONFIG_PATH = get_data_dir() / "config.json"
 _DEFAULT_LANG = "en"
 
 _current_lang: str = _DEFAULT_LANG

@@ -5,3 +5,8 @@ __pycache__/
 venv/
 .claude/
 credentials.json
+
+# PyInstaller
+dist/
+build/
+*.spec.bak
