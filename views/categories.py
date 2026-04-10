@@ -23,13 +23,28 @@ MATERIAL_ICONS = [
 ]
 
 COLORS = [
-    ("#E53935", "Vermelho"),  ("#FB8C00", "Laranja"),
-    ("#F4511E", "Laranja-esc"), ("#8E24AA", "Roxo"),
-    ("#1E88E5", "Azul"),      ("#00897B", "Verde-água"),
-    ("#43A047", "Verde"),     ("#7CB342", "Verde-claro"),
-    ("#00ACC1", "Ciano"),     ("#546E7A", "Cinza-azul"),
-    ("#F06292", "Rosa"),      ("#FFB300", "Amarelo"),
+    ("#FFE53935", "Vermelho"),  ("#FFFB8C00", "Laranja"),
+    ("#FFF4511E", "Laranja-esc"), ("#FF8E24AA", "Roxo"),
+    ("#FF1E88E5", "Azul"),      ("#FF00897B", "Verde-água"),
+    ("#FF43A047", "Verde"),     ("#FF7CB342", "Verde-claro"),
+    ("#FF00ACC1", "Ciano"),     ("#FF546E7A", "Cinza-azul"),
+    ("#FFF06292", "Rosa"),      ("#FFFFB300", "Amarelo"),
 ]
+
+
+def _to_icon(name: str) -> ft.Icons:
+    """Convert a stored icon name string to ft.Icons enum value."""
+    try:
+        return getattr(ft.Icons, name.upper())
+    except AttributeError:
+        return ft.Icons.MORE_HORIZ
+
+
+def _to_color(hex_color: str) -> str:
+    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
+    if hex_color.startswith("#") and len(hex_color) == 7:
+        return "#FF" + hex_color[1:]
+    return hex_color
 
 
 def _type_options() -> list:
@@ -84,9 +99,9 @@ class CategoriesView(ft.Column):
                         [
                             ft.Container(
                                 width=36, height=36,
-                                bgcolor=cat.color,
+                                bgcolor=_to_color(cat.color),
                                 border_radius=18,
-                                content=ft.Icon(cat.icon, color=ft.Colors.WHITE, size=18),
+                                content=ft.Icon(_to_icon(cat.icon), color=ft.Colors.WHITE, size=18),
                                 alignment=ft.alignment.Alignment(0, 0),
                             ),
                             ft.Container(width=12),

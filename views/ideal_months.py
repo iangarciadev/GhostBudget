@@ -15,6 +15,13 @@ def _fmt(value: float) -> str:
     return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def _to_color(hex_color: str) -> str:
+    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
+    if hex_color.startswith("#") and len(hex_color) == 7:
+        return "#FF" + hex_color[1:]
+    return hex_color
+
+
 def _open_dialog(page, dlg):
     if dlg not in page.overlay:
         page.overlay.append(dlg)
@@ -355,7 +362,7 @@ def _section_header(label: str, color) -> ft.Container:
 
 def _comparison_row(r: dict) -> ft.Container:
     cat_name = r["category_name"] or t("ideal_month.deleted_category")
-    color = r["category_color"]
+    color = _to_color(r["category_color"] or "#FF607D8B")
     target = r["target"]
     actual = r["actual"]
     diff = r["diff"]

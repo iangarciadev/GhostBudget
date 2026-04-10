@@ -68,6 +68,7 @@ def init_db() -> None:
             );
         """)
         _seed_default_categories(conn)
+        _migrate_colors(conn)
 
 
 def _seed_default_categories(conn: sqlite3.Connection) -> None:
@@ -76,18 +77,38 @@ def _seed_default_categories(conn: sqlite3.Connection) -> None:
         return
 
     defaults = [
-        ("Alimentação",   "#E53935", "restaurant",    "expense"),
-        ("Transporte",    "#FB8C00", "directions_car","expense"),
-        ("Moradia",       "#8E24AA", "home",           "expense"),
-        ("Saúde",         "#00897B", "health_and_safety", "expense"),
-        ("Lazer",         "#1E88E5", "sports_esports", "expense"),
-        ("Educação",      "#F4511E", "school",         "expense"),
-        ("Outros gastos", "#546E7A", "more_horiz",     "expense"),
-        ("Salário",       "#43A047", "payments",       "income"),
-        ("Freelance",     "#00ACC1", "work",           "income"),
-        ("Outros ganhos", "#7CB342", "attach_money",   "income"),
+        ("Alimentação",   "#FFE53935", "restaurant",       "expense"),
+        ("Transporte",    "#FFFB8C00", "directions_car",   "expense"),
+        ("Moradia",       "#FF8E24AA", "home",             "expense"),
+        ("Saúde",         "#FF00897B", "health_and_safety","expense"),
+        ("Lazer",         "#FF1E88E5", "sports_esports",   "expense"),
+        ("Educação",      "#FFF4511E", "school",           "expense"),
+        ("Outros gastos", "#FF546E7A", "more_horiz",       "expense"),
+        ("Salário",       "#FF43A047", "payments",         "income"),
+        ("Freelance",     "#FF00ACC1", "work",             "income"),
+        ("Outros ganhos", "#FF7CB342", "attach_money",     "income"),
     ]
     conn.executemany(
         "INSERT INTO categories (name, color, icon, type) VALUES (?, ?, ?, ?)",
         defaults,
     )
+
+
+def _migrate_colors(conn: sqlite3.Connection) -> None:
+    """Convert any stored 6-digit hex colors (#RRGGBB) to 8-digit ARGB (#FFRRGGBB)."""
+    rows = conn.execute("SELECT id, color FROM categories").fetchall()
+    for row in rows:
+        color = row["color"]
+        if color.startswith("#") and len(color) == 7:
+            conn.execute(
+                "UPDATE categories SET color = ? WHERE id = ?",
+                ("#FF" + color[1:], row["id"]),
+            )
+    rows = conn.execute("SELECT id, color FROM investments").fetchall()
+    for row in rows:
+        color = row["color"]
+        if color.startswith("#") and len(color) == 7:
+            conn.execute(
+                "UPDATE investments SET color = ? WHERE id = ?",
+                ("#FF" + color[1:], row["id"]),
+            )

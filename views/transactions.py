@@ -31,13 +31,37 @@ def _category_name(state: AppState, category_id: int | None) -> str:
     return t("transactions.no_category")
 
 
+def _to_color(hex_color: str) -> str:
+    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
+    if hex_color.startswith("#") and len(hex_color) == 7:
+        return "#FF" + hex_color[1:]
+    return hex_color
+
+
+def _to_icon(name: str) -> ft.Icons:
+    """Convert a stored icon name string to ft.Icons enum value."""
+    try:
+        return getattr(ft.Icons, name.upper())
+    except AttributeError:
+        return ft.Icons.MORE_HORIZ
+
+
 def _category_color(state: AppState, category_id: int | None) -> str:
     if category_id is None:
-        return "#607D8B"
+        return "#FF607D8B"
     for c in state.categories:
         if c.id == category_id:
-            return c.color
-    return "#607D8B"
+            return _to_color(c.color)
+    return "#FF607D8B"
+
+
+def _category_icon(state: AppState, category_id: int | None) -> ft.Icons:
+    if category_id is None:
+        return ft.Icons.MORE_HORIZ
+    for c in state.categories:
+        if c.id == category_id:
+            return _to_icon(c.icon)
+    return ft.Icons.MORE_HORIZ
 
 
 class TransactionsView(ft.Column):
@@ -90,8 +114,18 @@ class TransactionsView(ft.Column):
                 ft.Container(
                     content=ft.Row(
                         [
-                            ft.Container(width=4, height=48, bgcolor=cat_color, border_radius=2),
-                            ft.Container(width=8),
+                            ft.Container(
+                                width=36, height=36,
+                                bgcolor=cat_color,
+                                border_radius=18,
+                                content=ft.Icon(
+                                    _category_icon(self._state, tx.category_id),
+                                    color=ft.Colors.WHITE,
+                                    size=18,
+                                ),
+                                alignment=ft.alignment.Alignment(0, 0),
+                            ),
+                            ft.Container(width=12),
                             ft.Column(
                                 [
                                     ft.Text(

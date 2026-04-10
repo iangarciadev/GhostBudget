@@ -7,19 +7,26 @@ from controllers.investment_ctrl import (
 from i18n import t
 
 INVEST_COLORS = [
-    ("#009688", "Teal"),
-    ("#2196F3", "Azul"),
-    ("#4CAF50", "Verde"),
-    ("#FFC107", "Amarelo"),
-    ("#FF9800", "Laranja"),
-    ("#F44336", "Vermelho"),
-    ("#E91E63", "Rosa"),
-    ("#9C27B0", "Roxo"),
-    ("#3F51B5", "Índigo"),
-    ("#00BCD4", "Ciano"),
-    ("#8BC34A", "Verde-claro"),
-    ("#795548", "Marrom"),
+    ("#FF009688", "Teal"),
+    ("#FF2196F3", "Azul"),
+    ("#FF4CAF50", "Verde"),
+    ("#FFFFC107", "Amarelo"),
+    ("#FFFF9800", "Laranja"),
+    ("#FFF44336", "Vermelho"),
+    ("#FFE91E63", "Rosa"),
+    ("#FF9C27B0", "Roxo"),
+    ("#FF3F51B5", "Índigo"),
+    ("#FF00BCD4", "Ciano"),
+    ("#FF8BC34A", "Verde-claro"),
+    ("#FF795548", "Marrom"),
 ]
+
+
+def _to_color(hex_color: str) -> str:
+    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
+    if hex_color.startswith("#") and len(hex_color) == 7:
+        return "#FF" + hex_color[1:]
+    return hex_color
 
 
 def _fmt(value: float) -> str:
@@ -125,7 +132,7 @@ class InvestmentsView(ft.Column):
         bar = ft.Row(
             [
                 ft.Container(
-                    bgcolor=inv.color,
+                    bgcolor=_to_color(inv.color),
                     border_radius=4,
                     expand=max(1, round((inv.balance / total) * 1000)),
                     height=22,
@@ -142,7 +149,7 @@ class InvestmentsView(ft.Column):
                     [
                         ft.Container(
                             width=10, height=10,
-                            bgcolor=inv.color,
+                            bgcolor=_to_color(inv.color),
                             border_radius=2,
                         ),
                         ft.Text(
@@ -183,7 +190,7 @@ class InvestmentsView(ft.Column):
                         [
                             ft.Container(
                                 width=36, height=36,
-                                bgcolor=inv.color,
+                                bgcolor=_to_color(inv.color),
                                 border_radius=18,
                                 content=ft.Icon(
                                     ft.Icons.TRENDING_UP,

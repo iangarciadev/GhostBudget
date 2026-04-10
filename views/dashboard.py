@@ -8,6 +8,13 @@ def _fmt(value: float) -> str:
     return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def _to_color(hex_color: str) -> str:
+    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
+    if hex_color.startswith("#") and len(hex_color) == 7:
+        return "#FF" + hex_color[1:]
+    return hex_color
+
+
 def _summary_card(label: str, value: float, color: str) -> ft.Container:
     return ft.Container(
         content=ft.Column(
@@ -97,7 +104,7 @@ class DashboardView(ft.Column):
                     [
                         ft.Row(
                             [
-                                ft.Container(width=12, height=12, bgcolor=cat["color"], border_radius=2),
+                                ft.Container(width=12, height=12, bgcolor=_to_color(cat["color"]), border_radius=2),
                                 ft.Text(cat["name"], size=13, expand=True),
                                 ft.Text(_fmt(cat["total"]), size=13, weight=ft.FontWeight.W_500),
                             ],
@@ -106,7 +113,7 @@ class DashboardView(ft.Column):
                         ft.Container(
                             content=ft.Container(
                                 width=None,
-                                bgcolor=cat["color"],
+                                bgcolor=_to_color(cat["color"]),
                                 border_radius=4,
                             ),
                             bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
