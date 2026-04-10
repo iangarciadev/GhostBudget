@@ -61,6 +61,7 @@
   "settings.gdrive.hint": "To use Google Drive, place the credentials.json file (downloaded from Google Cloud Console) in the GhostBudget root folder.",
   "settings.language.section": "Language",
   "settings.language.label": "App language",
+  "settings.language.apply": "Apply",
 
   "sync.upload_ok": "Backup sent to Google Drive successfully.",
   "sync.download_ok": "Data restored from Google Drive successfully.",

@@ -21,7 +21,10 @@ class SettingsView(ft.Column):
                 ft.dropdown.Option("pt", i18n.t("lang.pt")),
             ],
         )
-        self._lang_dropdown.on_change = self._change_language
+        self._apply_btn = ft.ElevatedButton(
+            i18n.t("settings.language.apply"),
+            on_click=self._apply_language,
+        )
         self._build()
 
     def _build(self):
@@ -31,6 +34,7 @@ class SettingsView(ft.Column):
             ft.dropdown.Option("en", i18n.t("lang.en")),
             ft.dropdown.Option("pt", i18n.t("lang.pt")),
         ]
+        self._apply_btn.text = i18n.t("settings.language.apply")
         linked = sync_ctrl.is_linked()
 
         self.controls = [
@@ -107,7 +111,7 @@ class SettingsView(ft.Column):
                     [
                         ft.Text(i18n.t("settings.language.section"), size=16, weight=ft.FontWeight.W_600),
                         ft.Container(height=4),
-                        self._lang_dropdown,
+                        ft.Row([self._lang_dropdown, self._apply_btn], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                     ],
                     spacing=6,
                 ),
@@ -144,10 +148,9 @@ class SettingsView(ft.Column):
         except Exception as ex:
             self._set_status(str(ex), error=True)
 
-    def _change_language(self, e):
-        i18n.load_language(e.control.value)
+    def _apply_language(self, e):
+        i18n.load_language(self._lang_dropdown.value)
         self._on_lang_change()
-        self.refresh()
 
     def refresh(self):
         self._build()

@@ -36,9 +36,10 @@ def main(page: ft.Page):
         render(page.route)
 
     def on_lang_change():
-        """Chamado quando o usuário troca o idioma — atualiza navbar."""
+        """Chamado quando o usuário troca o idioma — atualiza navbar e re-renderiza a view."""
         state.language = i18n.get_current_language()
         navbar.refresh()
+        render(page.route)
 
     def render(route: str):
         navbar.sync_route(route)
