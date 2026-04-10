@@ -59,6 +59,14 @@ def _type_label(type_key: str) -> str:
     return t(f"categories.type.{type_key}" if type_key != "all" else "categories.type.both")
 
 
+def _section_header(label: str) -> ft.Container:
+    return ft.Container(
+        content=ft.Text(label, size=12, weight=ft.FontWeight.W_600,
+                        color=ft.Colors.ON_SURFACE_VARIANT),
+        padding=ft.padding.only(left=24, top=16, bottom=4),
+    )
+
+
 class CategoriesView(ft.Column):
     def __init__(self, page: ft.Page, state: AppState, on_change):
         super().__init__(expand=True, scroll=ft.ScrollMode.AUTO, spacing=0)
@@ -90,53 +98,57 @@ class CategoriesView(ft.Column):
         ]
 
     def _build_list(self):
+        groups = [
+            ("expense", t("categories.type.expense")),
+            ("income",  t("categories.type.income")),
+            ("all",     t("categories.type.both")),
+        ]
         items = []
-        for cat in self._state.categories:
-            type_key = cat.type if cat.type in ("expense", "income") else "all"
-            items.append(
-                ft.Container(
-                    content=ft.Row(
-                        [
-                            ft.Container(
-                                width=36, height=36,
-                                bgcolor=_to_color(cat.color),
-                                border_radius=18,
-                                content=ft.Icon(_to_icon(cat.icon), color=ft.Colors.WHITE, size=18),
-                                alignment=ft.alignment.Alignment(0, 0),
-                            ),
-                            ft.Container(width=12),
-                            ft.Column(
-                                [
-                                    ft.Text(cat.name, weight=ft.FontWeight.W_500, size=14),
-                                    ft.Text(
-                                        _type_label(type_key),
-                                        size=12,
-                                        color=ft.Colors.ON_SURFACE_VARIANT,
-                                    ),
-                                ],
-                                spacing=2,
-                                expand=True,
-                            ),
-                            ft.IconButton(
-                                icon=ft.Icons.EDIT_OUTLINED,
-                                tooltip=t("categories.edit"),
-                                data=cat,
-                                on_click=self._edit,
-                            ),
-                            ft.IconButton(
-                                icon=ft.Icons.DELETE_OUTLINE,
-                                tooltip=t("categories.delete"),
-                                icon_color=ft.Colors.ON_SURFACE_VARIANT,
-                                data=cat.id,
-                                on_click=self._delete,
-                            ),
-                        ],
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                    padding=ft.padding.symmetric(horizontal=24, vertical=8),
+        for type_key, section_label in groups:
+            cats = [c for c in self._state.categories if c.type == type_key]
+            if not cats:
+                continue
+            items.append(_section_header(section_label))
+            for cat in cats:
+                items.append(
+                    ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Container(
+                                    width=36, height=36,
+                                    bgcolor=_to_color(cat.color),
+                                    border_radius=18,
+                                    content=ft.Icon(_to_icon(cat.icon), color=ft.Colors.WHITE, size=18),
+                                    alignment=ft.alignment.Alignment(0, 0),
+                                ),
+                                ft.Container(width=12),
+                                ft.Column(
+                                    [
+                                        ft.Text(cat.name, weight=ft.FontWeight.W_500, size=14),
+                                    ],
+                                    spacing=2,
+                                    expand=True,
+                                ),
+                                ft.IconButton(
+                                    icon=ft.Icons.EDIT_OUTLINED,
+                                    tooltip=t("categories.edit"),
+                                    data=cat,
+                                    on_click=self._edit,
+                                ),
+                                ft.IconButton(
+                                    icon=ft.Icons.DELETE_OUTLINE,
+                                    tooltip=t("categories.delete"),
+                                    icon_color=ft.Colors.ON_SURFACE_VARIANT,
+                                    data=cat.id,
+                                    on_click=self._delete,
+                                ),
+                            ],
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        padding=ft.padding.symmetric(horizontal=24, vertical=8),
+                    )
                 )
-            )
-            items.append(ft.Divider(height=1))
+                items.append(ft.Divider(height=1))
         return items
 
     def _edit(self, e):
