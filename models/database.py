@@ -33,6 +33,23 @@ def init_db() -> None:
                 date        TEXT    NOT NULL,
                 created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS investments (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                name       TEXT    NOT NULL,
+                color      TEXT    NOT NULL DEFAULT '#009688',
+                created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS investment_transactions (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                investment_id INTEGER NOT NULL REFERENCES investments(id) ON DELETE CASCADE,
+                amount        REAL    NOT NULL,
+                operation     TEXT    NOT NULL CHECK(operation IN ('deposit', 'withdrawal')),
+                note          TEXT,
+                date          TEXT    NOT NULL,
+                created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+            );
         """)
         _seed_default_categories(conn)
 

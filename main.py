@@ -6,6 +6,7 @@ from components.navbar import NavBar
 from views.dashboard import DashboardView
 from views.transactions import TransactionsView
 from views.categories import CategoriesView
+from views.investments import InvestmentsView
 from views.settings import SettingsView
 
 
@@ -55,6 +56,10 @@ def main(page: ft.Page):
             case "/categories":
                 content_area.controls.append(
                     CategoriesView(page, state, on_data_change)
+                )
+            case "/investments":
+                content_area.controls.append(
+                    InvestmentsView(page, state, on_data_change)
                 )
             case "/settings":
                 content_area.controls.append(

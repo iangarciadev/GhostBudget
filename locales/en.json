@@ -2,6 +2,7 @@
   "nav.dashboard": "Dashboard",
   "nav.transactions": "Transactions",
   "nav.categories": "Categories",
+  "nav.investments": "Investments",
   "nav.settings": "Settings",
 
   "dashboard.title": "Summary \u2014 {month}",
@@ -66,5 +67,27 @@
   "sync.link_ok": "Google account linked successfully.",
 
   "lang.en": "English",
-  "lang.pt": "Portugu\u00eas"
+  "lang.pt": "Portugu\u00eas",
+
+  "investments.title": "Investments",
+  "investments.new": "New investment",
+  "investments.edit": "Edit",
+  "investments.delete": "Delete",
+  "investments.deposit": "Deposit",
+  "investments.withdraw": "Withdraw",
+  "investments.empty": "No investments yet.",
+  "investments.total_invested": "Total invested",
+  "investments.count": "{count} investment(s)",
+  "investments.form.name": "Name",
+  "investments.form.color": "Color",
+  "investments.form.amount": "Amount (R$)",
+  "investments.form.date": "Date",
+  "investments.form.note": "Note (optional)",
+  "investments.dialog.new": "New investment",
+  "investments.dialog.edit": "Edit investment",
+  "investments.cancel": "Cancel",
+  "investments.save": "Save",
+  "investments.error.name_required": "Please enter a name",
+  "investments.error.invalid_amount": "Invalid amount",
+  "investments.error.insufficient_balance": "Insufficient balance for withdrawal"
 }

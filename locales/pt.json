@@ -2,6 +2,7 @@
   "nav.dashboard": "Dashboard",
   "nav.transactions": "Lan\u00e7amentos",
   "nav.categories": "Categorias",
+  "nav.investments": "Investimentos",
   "nav.settings": "Config",
 
   "dashboard.title": "Resumo \u2014 {month}",
@@ -66,5 +67,27 @@
   "sync.link_ok": "Conta Google vinculada com sucesso.",
 
   "lang.en": "English",
-  "lang.pt": "Portugu\u00eas"
+  "lang.pt": "Portugu\u00eas",
+
+  "investments.title": "Investimentos",
+  "investments.new": "Novo investimento",
+  "investments.edit": "Editar",
+  "investments.delete": "Excluir",
+  "investments.deposit": "Depositar",
+  "investments.withdraw": "Retirar",
+  "investments.empty": "Nenhum investimento cadastrado.",
+  "investments.total_invested": "Total investido",
+  "investments.count": "{count} investimento(s)",
+  "investments.form.name": "Nome",
+  "investments.form.color": "Cor",
+  "investments.form.amount": "Valor (R$)",
+  "investments.form.date": "Data",
+  "investments.form.note": "Observa\u00e7\u00e3o (opcional)",
+  "investments.dialog.new": "Novo investimento",
+  "investments.dialog.edit": "Editar investimento",
+  "investments.cancel": "Cancelar",
+  "investments.save": "Salvar",
+  "investments.error.name_required": "Informe um nome",
+  "investments.error.invalid_amount": "Valor inv\u00e1lido",
+  "investments.error.insufficient_balance": "Saldo insuficiente para retirada"
 }
