@@ -12,9 +12,25 @@ class SettingsView(ft.Column):
         self._on_change = on_change
         self._on_lang_change = on_lang_change
         self._status_text = ft.Text("", color=ft.Colors.GREEN_600)
+        self._lang_dropdown = ft.Dropdown(
+            label=i18n.t("settings.language.label"),
+            width=220,
+            value=i18n.get_current_language(),
+            options=[
+                ft.dropdown.Option("en", i18n.t("lang.en")),
+                ft.dropdown.Option("pt", i18n.t("lang.pt")),
+            ],
+        )
+        self._lang_dropdown.on_change = self._change_language
         self._build()
 
     def _build(self):
+        self._lang_dropdown.label = i18n.t("settings.language.label")
+        self._lang_dropdown.value = i18n.get_current_language()
+        self._lang_dropdown.options = [
+            ft.dropdown.Option("en", i18n.t("lang.en")),
+            ft.dropdown.Option("pt", i18n.t("lang.pt")),
+        ]
         linked = sync_ctrl.is_linked()
 
         self.controls = [
@@ -91,16 +107,7 @@ class SettingsView(ft.Column):
                     [
                         ft.Text(i18n.t("settings.language.section"), size=16, weight=ft.FontWeight.W_600),
                         ft.Container(height=4),
-                        ft.Dropdown(
-                            label=i18n.t("settings.language.label"),
-                            width=220,
-                            value=i18n.get_current_language(),
-                            options=[
-                                ft.dropdown.Option("en", i18n.t("lang.en")),
-                                ft.dropdown.Option("pt", i18n.t("lang.pt")),
-                            ],
-                            on_change=self._change_language,
-                        ),
+                        self._lang_dropdown,
                     ],
                     spacing=6,
                 ),
