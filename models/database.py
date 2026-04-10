@@ -68,6 +68,7 @@ def init_db() -> None:
         """)
         _seed_default_categories(conn)
         _migrate_colors(conn)
+        _migrate_add_parent_id(conn)
 
 
 def _seed_default_categories(conn: sqlite3.Connection) -> None:
@@ -91,6 +92,16 @@ def _seed_default_categories(conn: sqlite3.Connection) -> None:
         "INSERT INTO categories (name, color, icon, type) VALUES (?, ?, ?, ?)",
         defaults,
     )
+
+
+def _migrate_add_parent_id(conn: sqlite3.Connection) -> None:
+    """Add parent_id column to categories if it doesn't exist yet."""
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(categories)").fetchall()]
+    if "parent_id" not in cols:
+        conn.execute(
+            "ALTER TABLE categories ADD COLUMN"
+            " parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL"
+        )
 
 
 def _migrate_colors(conn: sqlite3.Connection) -> None:

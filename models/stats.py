@@ -24,15 +24,23 @@ def get_monthly_summary(month: str) -> dict:
 
 
 def get_expense_by_category(month: str) -> list[dict]:
-    """Retorna lista {category_id, name, color, total} das despesas do mês por categoria."""
+    """Retorna despesas do mês agrupadas hierarquicamente.
+
+    Cada item de nível superior tem:
+        {category_id, name, color, total, subcategories}
+    onde total = gastos diretos na categoria-mãe + soma das subcategorias,
+    e subcategories é lista de {category_id, name, total}.
+    Subcategorias sem gasto no mês não aparecem na lista interna.
+    """
     with get_connection() as conn:
         rows = conn.execute(
             """
             SELECT
-                c.id   AS category_id,
-                c.name AS name,
-                c.color AS color,
-                COALESCE(SUM(t.amount), 0) AS total
+                c.id        AS category_id,
+                c.name      AS name,
+                c.color     AS color,
+                c.parent_id AS parent_id,
+                COALESCE(SUM(t.amount), 0) AS direct_total
             FROM categories c
             LEFT JOIN transactions t
                 ON t.category_id = c.id
@@ -40,12 +48,48 @@ def get_expense_by_category(month: str) -> list[dict]:
                 AND strftime('%Y-%m', t.date) = ?
             WHERE c.type IN ('expense', 'all')
             GROUP BY c.id
-            HAVING total > 0
-            ORDER BY total DESC
             """,
             (month,),
         ).fetchall()
-    return [dict(r) for r in rows]
+
+    all_cats = [dict(r) for r in rows]
+
+    # Index by id for fast lookup
+    by_id = {r["category_id"]: r for r in all_cats}
+
+    # Separate top-level from subcategories
+    top_level = [r for r in all_cats if r["parent_id"] is None]
+    subs_by_parent: dict[int, list[dict]] = {}
+    for r in all_cats:
+        if r["parent_id"] is not None:
+            subs_by_parent.setdefault(r["parent_id"], []).append(r)
+
+    result = []
+    for parent in top_level:
+        subs = subs_by_parent.get(parent["category_id"], [])
+        active_subs = sorted(
+            [s for s in subs if s["direct_total"] > 0],
+            key=lambda x: x["direct_total"],
+            reverse=True,
+        )
+        parent_total = parent["direct_total"] + sum(s["direct_total"] for s in subs)
+        if parent_total <= 0:
+            continue
+        result.append(
+            {
+                "category_id": parent["category_id"],
+                "name": parent["name"],
+                "color": parent["color"],
+                "total": parent_total,
+                "subcategories": [
+                    {"category_id": s["category_id"], "name": s["name"], "total": s["direct_total"]}
+                    for s in active_subs
+                ],
+            }
+        )
+
+    result.sort(key=lambda x: x["total"], reverse=True)
+    return result
 
 
 def get_monthly_trend(months: int = 6) -> list[dict]:

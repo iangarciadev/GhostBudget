@@ -27,6 +27,11 @@ def _category_name(state: AppState, category_id: int | None) -> str:
         return t("transactions.no_category")
     for c in state.categories:
         if c.id == category_id:
+            # Show "Parent > Sub" for subcategories
+            if c.parent_id is not None:
+                parent = next((p for p in state.categories if p.id == c.parent_id), None)
+                if parent:
+                    return f"{parent.name} › {c.name}"
             return c.name
     return t("transactions.no_category")
 
@@ -51,6 +56,11 @@ def _category_color(state: AppState, category_id: int | None) -> str:
         return "#FF607D8B"
     for c in state.categories:
         if c.id == category_id:
+            # Subcategory inherits parent's color
+            if c.parent_id is not None:
+                parent = next((p for p in state.categories if p.id == c.parent_id), None)
+                if parent:
+                    return _to_color(parent.color)
             return _to_color(c.color)
     return "#FF607D8B"
 
@@ -60,8 +70,42 @@ def _category_icon(state: AppState, category_id: int | None) -> ft.Icons:
         return ft.Icons.MORE_HORIZ
     for c in state.categories:
         if c.id == category_id:
+            # Subcategory inherits parent's icon
+            if c.parent_id is not None:
+                parent = next((p for p in state.categories if p.id == c.parent_id), None)
+                if parent:
+                    return _to_icon(parent.icon)
             return _to_icon(c.icon)
     return ft.Icons.MORE_HORIZ
+
+
+def _build_category_options(cats: list) -> list[ft.dropdown.Option]:
+    """Build dropdown options with subcategories grouped under their parents.
+
+    Parent categories with subcategories appear as a selectable entry followed
+    by indented subcategory entries.  Parents without subcategories appear as
+    normal entries.
+    """
+    # Index subcategories by parent_id
+    subs_by_parent: dict[int, list] = {}
+    for c in cats:
+        if c.parent_id is not None:
+            subs_by_parent.setdefault(c.parent_id, []).append(c)
+
+    top_level = [c for c in cats if c.parent_id is None]
+    options: list[ft.dropdown.Option] = []
+
+    for cat in sorted(top_level, key=lambda c: c.name):
+        subs = sorted(subs_by_parent.get(cat.id, []), key=lambda c: c.name)
+        if subs:
+            # Parent is selectable but labelled to hint it has subcategories
+            options.append(ft.dropdown.Option(key=str(cat.id), text=cat.name))
+            for sub in subs:
+                options.append(ft.dropdown.Option(key=str(sub.id), text=f"  ↳ {sub.name}"))
+        else:
+            options.append(ft.dropdown.Option(key=str(cat.id), text=cat.name))
+
+    return options
 
 
 class TransactionsView(ft.Column):
@@ -182,35 +226,39 @@ class _TransactionForm:
         self._state = state
         self._on_change = on_change
 
-        self._amount = ft.TextField(label=t("transactions.form.amount"), keyboard_type=ft.KeyboardType.NUMBER, width=200)
+        self._amount = ft.TextField(
+            label=t("transactions.form.amount"),
+            keyboard_type=ft.KeyboardType.NUMBER,
+            width=200,
+        )
         self._desc = ft.TextField(label=t("transactions.form.desc"), expand=True)
         self._date_field = ft.TextField(
-            label=t("transactions.form.date"), value=date.today().isoformat(), width=160,
+            label=t("transactions.form.date"),
+            value=date.today().isoformat(),
+            width=160,
             hint_text=t("transactions.form.date_hint"),
         )
         self._type_toggle = ft.SegmentedButton(
             selected=["expense"],
             segments=[
                 ft.Segment(value="expense", label=ft.Text(t("transactions.form.type_expense"))),
-                ft.Segment(value="income", label=ft.Text(t("transactions.form.type_income"))),
+                ft.Segment(value="income",  label=ft.Text(t("transactions.form.type_income"))),
             ],
         )
+
         expense_cats = [c for c in state.categories if c.type in ("expense", "all")]
         income_cats  = [c for c in state.categories if c.type in ("income", "all")]
 
         self._category = ft.Dropdown(
             label=t("transactions.form.category"),
-            options=[ft.dropdown.Option(key=str(c.id), text=c.name) for c in expense_cats],
+            options=_build_category_options(expense_cats),
             width=220,
         )
 
         def on_type_change(e):
             selected = list(self._type_toggle.selected)[0]
-            if selected == "expense":
-                cats = expense_cats
-            else:
-                cats = income_cats
-            self._category.options = [ft.dropdown.Option(key=str(c.id), text=c.name) for c in cats]
+            cats = expense_cats if selected == "expense" else income_cats
+            self._category.options = _build_category_options(cats)
             self._category.value = None
             self._category.update()
 

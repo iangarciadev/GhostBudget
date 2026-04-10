@@ -33,7 +33,6 @@ COLORS = [
 
 
 def _to_icon(name: str) -> ft.Icons:
-    """Convert a stored icon name string to ft.Icons enum value."""
     try:
         return getattr(ft.Icons, name.upper())
     except AttributeError:
@@ -41,7 +40,6 @@ def _to_icon(name: str) -> ft.Icons:
 
 
 def _to_color(hex_color: str) -> str:
-    """Ensure color has 8-digit ARGB hex format required by Flet 0.84."""
     if hex_color.startswith("#") and len(hex_color) == 7:
         return "#FF" + hex_color[1:]
     return hex_color
@@ -53,10 +51,6 @@ def _type_options() -> list:
         ft.dropdown.Option(key="income",  text=t("categories.type.income")),
         ft.dropdown.Option(key="all",     text=t("categories.type.both")),
     ]
-
-
-def _type_label(type_key: str) -> str:
-    return t(f"categories.type.{type_key}" if type_key != "all" else "categories.type.both")
 
 
 def _section_header(label: str) -> ft.Container:
@@ -103,53 +97,111 @@ class CategoriesView(ft.Column):
             ("income",  t("categories.type.income")),
             ("all",     t("categories.type.both")),
         ]
+        all_cats = self._state.categories
+
+        subs_by_parent: dict[int, list] = {}
+        for c in all_cats:
+            if c.parent_id is not None:
+                subs_by_parent.setdefault(c.parent_id, []).append(c)
+
         items = []
         for type_key, section_label in groups:
-            cats = [c for c in self._state.categories if c.type == type_key]
+            cats = [c for c in all_cats if c.type == type_key and c.parent_id is None]
             if not cats:
                 continue
             items.append(_section_header(section_label))
             for cat in cats:
-                items.append(
-                    ft.Container(
-                        content=ft.Row(
-                            [
-                                ft.Container(
-                                    width=36, height=36,
-                                    bgcolor=_to_color(cat.color),
-                                    border_radius=18,
-                                    content=ft.Icon(_to_icon(cat.icon), color=ft.Colors.WHITE, size=18),
-                                    alignment=ft.alignment.Alignment(0, 0),
-                                ),
-                                ft.Container(width=12),
-                                ft.Column(
-                                    [
-                                        ft.Text(cat.name, weight=ft.FontWeight.W_500, size=14),
-                                    ],
-                                    spacing=2,
-                                    expand=True,
-                                ),
-                                ft.IconButton(
-                                    icon=ft.Icons.EDIT_OUTLINED,
-                                    tooltip=t("categories.edit"),
-                                    data=cat,
-                                    on_click=self._edit,
-                                ),
-                                ft.IconButton(
-                                    icon=ft.Icons.DELETE_OUTLINE,
-                                    tooltip=t("categories.delete"),
-                                    icon_color=ft.Colors.ON_SURFACE_VARIANT,
-                                    data=cat.id,
-                                    on_click=self._delete,
-                                ),
-                            ],
-                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        ),
-                        padding=ft.padding.symmetric(horizontal=24, vertical=8),
-                    )
-                )
+                subs = sorted(subs_by_parent.get(cat.id, []), key=lambda c: c.name)
+                items.append(self._category_row(cat, sub_count=len(subs)))
                 items.append(ft.Divider(height=1))
+                for sub in subs:
+                    items.append(self._subcategory_row(sub, cat))
+                    items.append(ft.Divider(height=1))
         return items
+
+    def _category_row(self, cat, sub_count: int = 0):
+        name_parts = [ft.Text(cat.name, weight=ft.FontWeight.W_500, size=14)]
+        if sub_count:
+            name_parts.append(
+                ft.Text(f"{sub_count} sub", size=11, color=ft.Colors.ON_SURFACE_VARIANT)
+            )
+        return ft.Container(
+            content=ft.Row(
+                [
+                    ft.Container(
+                        width=36, height=36,
+                        bgcolor=_to_color(cat.color),
+                        border_radius=18,
+                        content=ft.Icon(_to_icon(cat.icon), color=ft.Colors.WHITE, size=18),
+                        alignment=ft.alignment.Alignment(0, 0),
+                    ),
+                    ft.Container(width=12),
+                    ft.Row(name_parts, spacing=6, expand=True),
+                    ft.IconButton(
+                        icon=ft.Icons.ADD,
+                        tooltip=t("categories.add_sub"),
+                        data=cat,
+                        on_click=self._add_sub,
+                    ),
+                    ft.IconButton(
+                        icon=ft.Icons.EDIT_OUTLINED,
+                        tooltip=t("categories.edit"),
+                        data=cat,
+                        on_click=self._edit,
+                    ),
+                    ft.IconButton(
+                        icon=ft.Icons.DELETE_OUTLINE,
+                        tooltip=t("categories.delete"),
+                        icon_color=ft.Colors.ON_SURFACE_VARIANT,
+                        data=cat.id,
+                        on_click=self._delete,
+                    ),
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            padding=ft.padding.symmetric(horizontal=24, vertical=8),
+        )
+
+    def _subcategory_row(self, sub, parent_cat):
+        return ft.Container(
+            content=ft.Row(
+                [
+                    ft.Container(width=24),
+                    ft.Icon(ft.Icons.SUBDIRECTORY_ARROW_RIGHT, size=14,
+                            color=ft.Colors.ON_SURFACE_VARIANT),
+                    ft.Container(width=4),
+                    ft.Container(
+                        width=28, height=28,
+                        bgcolor=_to_color(parent_cat.color),
+                        border_radius=14,
+                        content=ft.Icon(_to_icon(parent_cat.icon), color=ft.Colors.WHITE, size=14),
+                        alignment=ft.alignment.Alignment(0, 0),
+                    ),
+                    ft.Container(width=8),
+                    ft.Text(sub.name, weight=ft.FontWeight.W_400, size=13, expand=True),
+                    ft.IconButton(
+                        icon=ft.Icons.EDIT_OUTLINED,
+                        tooltip=t("categories.edit"),
+                        data=sub,
+                        on_click=self._edit,
+                    ),
+                    ft.IconButton(
+                        icon=ft.Icons.DELETE_OUTLINE,
+                        tooltip=t("categories.delete"),
+                        icon_color=ft.Colors.ON_SURFACE_VARIANT,
+                        data=sub.id,
+                        on_click=self._delete,
+                    ),
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            padding=ft.padding.symmetric(horizontal=24, vertical=6),
+        )
+
+    def _add_sub(self, e):
+        _CategoryForm(
+            self._page, self._state, self._on_change, parent=e.control.data
+        ).open()
 
     def _edit(self, e):
         _CategoryForm(self._page, self._state, self._on_change, existing=e.control.data).open()
@@ -164,47 +216,119 @@ class CategoriesView(ft.Column):
 
 
 class _CategoryForm:
-    def __init__(self, page, state, on_change, existing=None):
+    """Form for creating/editing categories and subcategories.
+
+    - No existing, no parent  → create top-level category (name + type + color + icon)
+    - parent provided         → create subcategory under that parent (name only)
+    - existing, no parent_id  → edit top-level category
+    - existing with parent_id → edit subcategory (name only)
+    """
+
+    def __init__(self, page, state, on_change, existing=None, parent=None):
         self._page = page
         self._state = state
         self._on_change = on_change
         self._existing = existing
 
+        # Resolve the parent category object
+        if parent is not None:
+            self._parent = parent
+        elif existing and existing.parent_id:
+            self._parent = next(
+                (c for c in state.categories if c.id == existing.parent_id), None
+            )
+        else:
+            self._parent = None
+
+        is_sub = self._parent is not None
+
         self._name = ft.TextField(
-            label=t("categories.form.name"), value=existing.name if existing else "", expand=True
-        )
-        self._type = ft.Dropdown(
-            label=t("categories.form.type"), options=_type_options(), width=160,
-            value=existing.type if existing else "expense",
-        )
-        self._color = ft.Dropdown(
-            label=t("categories.form.color"),
-            options=[ft.dropdown.Option(key=c, text=lbl) for c, lbl in COLORS],
-            value=existing.color if existing else COLORS[0][0],
-            width=160,
-        )
-        self._icon = ft.Dropdown(
-            label=t("categories.form.icon"),
-            options=[ft.dropdown.Option(key=i, text=i) for i in MATERIAL_ICONS],
-            value=existing.icon if existing else MATERIAL_ICONS[0],
-            width=200,
+            label=t("categories.form.name"),
+            value=existing.name if existing else "",
+            expand=True,
         )
 
-        title = t("categories.dialog.edit") if existing else t("categories.dialog.new")
-        self._dlg = ft.AlertDialog(
-            title=ft.Text(title),
-            content=ft.Column(
-                [
-                    ft.Row([self._name, self._type]),
-                    ft.Row([self._color, self._icon]),
+        if is_sub:
+            # Subcategory form: only name + info about parent
+            title = (
+                t("categories.dialog.edit_sub")
+                if existing
+                else t("categories.dialog.new_sub", parent=self._parent.name)
+            )
+            self._dlg = ft.AlertDialog(
+                title=ft.Text(title),
+                content=ft.Column(
+                    [
+                        self._name,
+                        ft.Row(
+                            [
+                                ft.Container(
+                                    width=20, height=20,
+                                    bgcolor=_to_color(self._parent.color),
+                                    border_radius=10,
+                                    content=ft.Icon(
+                                        _to_icon(self._parent.icon),
+                                        color=ft.Colors.WHITE,
+                                        size=12,
+                                    ),
+                                    alignment=ft.alignment.Alignment(0, 0),
+                                ),
+                                ft.Text(
+                                    t("categories.form.inherits_style",
+                                      parent=self._parent.name),
+                                    size=12,
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                ),
+                            ],
+                            spacing=8,
+                        ),
+                    ],
+                    tight=True,
+                    spacing=12,
+                    width=340,
+                ),
+                actions=[
+                    ft.TextButton(t("categories.cancel"), on_click=lambda e: self._close()),
+                    ft.ElevatedButton(t("categories.save"), on_click=self._save),
                 ],
-                tight=True, spacing=12, width=460,
-            ),
-            actions=[
-                ft.TextButton(t("categories.cancel"), on_click=lambda e: self._close()),
-                ft.ElevatedButton(t("categories.save"), on_click=self._save),
-            ],
-        )
+            )
+        else:
+            # Top-level category form: name + type + color + icon
+            self._type = ft.Dropdown(
+                label=t("categories.form.type"),
+                options=_type_options(),
+                width=160,
+                value=existing.type if existing else "expense",
+            )
+            self._color = ft.Dropdown(
+                label=t("categories.form.color"),
+                options=[ft.dropdown.Option(key=c, text=lbl) for c, lbl in COLORS],
+                value=existing.color if existing else COLORS[0][0],
+                width=160,
+            )
+            self._icon = ft.Dropdown(
+                label=t("categories.form.icon"),
+                options=[ft.dropdown.Option(key=i, text=i) for i in MATERIAL_ICONS],
+                value=existing.icon if existing else MATERIAL_ICONS[0],
+                width=200,
+            )
+            title = t("categories.dialog.edit") if existing else t("categories.dialog.new")
+            self._dlg = ft.AlertDialog(
+                title=ft.Text(title),
+                content=ft.Column(
+                    [
+                        ft.Row([self._name, self._type]),
+                        ft.Row([self._color, self._icon]),
+                    ],
+                    tight=True,
+                    spacing=12,
+                    width=460,
+                ),
+                actions=[
+                    ft.TextButton(t("categories.cancel"), on_click=lambda e: self._close()),
+                    ft.ElevatedButton(t("categories.save"), on_click=self._save),
+                ],
+            )
 
     def open(self):
         _open_dialog(self._page, self._dlg)
@@ -219,14 +343,22 @@ class _CategoryForm:
             self._name.update()
             return
 
-        color = self._color.value or COLORS[0][0]
-        icon = self._icon.value or MATERIAL_ICONS[0]
-        type_ = self._type.value or "expense"
+        if self._parent:
+            # Subcategory: inherit everything from parent
+            color = self._parent.color
+            icon = self._parent.icon
+            type_ = self._parent.type
+            parent_id = self._parent.id
+        else:
+            color = self._color.value or COLORS[0][0]
+            icon = self._icon.value or MATERIAL_ICONS[0]
+            type_ = self._type.value or "expense"
+            parent_id = None
 
         if self._existing:
-            edit_category(self._state, self._existing.id, name, color, icon, type_)
+            edit_category(self._state, self._existing.id, name, color, icon, type_, parent_id)
         else:
-            add_category(self._state, name, color, icon, type_)
+            add_category(self._state, name, color, icon, type_, parent_id)
 
         self._close()
         self._on_change()

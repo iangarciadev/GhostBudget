@@ -49,6 +49,10 @@
   "categories.dialog.edit": "Editar categoria",
   "categories.cancel": "Cancelar",
   "categories.save": "Salvar",
+  "categories.add_sub": "Adicionar subcategoria",
+  "categories.dialog.new_sub": "Nova subcategoria — {parent}",
+  "categories.dialog.edit_sub": "Editar subcategoria",
+  "categories.form.inherits_style": "Herda cor e ícone de {parent}",
 
   "settings.title": "Configura\u00e7\u00f5es",
   "settings.gdrive.section": "Google Drive",

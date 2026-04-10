@@ -98,14 +98,14 @@ class DashboardView(ft.Column):
         max_val = max(c["total"] for c in by_cat)
         bars = []
         for cat in by_cat:
-            pct = cat["total"] / max_val if max_val else 0
+            color = _to_color(cat["color"])
             bars.append(
                 ft.Column(
                     [
                         ft.Row(
                             [
-                                ft.Container(width=12, height=12, bgcolor=_to_color(cat["color"]), border_radius=2),
-                                ft.Text(cat["name"], size=13, expand=True),
+                                ft.Container(width=12, height=12, bgcolor=color, border_radius=2),
+                                ft.Text(cat["name"], size=13, expand=True, weight=ft.FontWeight.W_500),
                                 ft.Text(_fmt(cat["total"]), size=13, weight=ft.FontWeight.W_500),
                             ],
                             spacing=8,
@@ -113,7 +113,7 @@ class DashboardView(ft.Column):
                         ft.Container(
                             content=ft.Container(
                                 width=None,
-                                bgcolor=_to_color(cat["color"]),
+                                bgcolor=color,
                                 border_radius=4,
                             ),
                             bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
@@ -122,11 +122,40 @@ class DashboardView(ft.Column):
                             alignment=ft.alignment.Alignment(-1, 0),
                             expand=True,
                         ),
+                        *self._build_subcategory_bars(cat.get("subcategories", []), cat["total"], color),
                     ],
                     spacing=4,
                 )
             )
         return bars
+
+    def _build_subcategory_bars(
+        self, subs: list[dict], parent_total: float, color: str
+    ) -> list:
+        if not subs:
+            return []
+        rows = []
+        for sub in subs:
+            pct = sub["total"] / parent_total if parent_total else 0
+            rows.append(
+                ft.Container(
+                    content=ft.Row(
+                        [
+                            ft.Container(width=20),  # indent
+                            ft.Icon(ft.Icons.SUBDIRECTORY_ARROW_RIGHT, size=12,
+                                    color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Container(width=4),
+                            ft.Text(sub["name"], size=12, expand=True,
+                                    color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Text(_fmt(sub["total"]), size=12,
+                                    color=ft.Colors.ON_SURFACE_VARIANT),
+                        ],
+                        spacing=4,
+                    ),
+                    padding=ft.padding.only(top=2),
+                )
+            )
+        return rows
 
     def _build_trend(self, trend: list[dict]) -> list:
         if not trend:
