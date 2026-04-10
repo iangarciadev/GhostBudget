@@ -77,6 +77,7 @@ def main(page: ft.Page):
     )
 
     page.go("/")
+    page.update()
 
 
 if __name__ == "__main__":
