@@ -1,6 +1,10 @@
 # GhostBudget
 
+[English](README.md) | [Português](README.pt-BR.md)
+
 A personal finance desktop app built with Python and Flet.
+
+> **Disclaimer:** This is a personal project built by a solo developer for personal use. It is being developed with the assistance of [Claude Code](https://claude.ai/code).
 
 ## Features
 
@@ -8,6 +12,9 @@ A personal finance desktop app built with Python and Flet.
 - Add and edit transactions (income and expenses)
 - Customizable categories with color and icon
 - Month navigation
+- Investment tracking with deposits and withdrawals
+- Ideal month planning with comparison against actual spending
+- Interface available in English and Portuguese (BR)
 - Backup and restore via Google Drive (optional)
 
 ## Tech stack
@@ -77,6 +84,7 @@ With `credentials.json` in place, open the app, go to **Settings**, and click **
 GhostBudget/
 ├── main.py                  # Entry point
 ├── state.py                 # Global app state
+├── i18n.py                  # Internationalization (EN / PT-BR)
 ├── requirements.txt
 ├── credentials.example.json # Template for Google Drive setup
 ├── models/                  # Database access
@@ -84,7 +92,8 @@ GhostBudget/
 ├── views/                   # App screens
 ├── components/              # Reusable UI components (navbar)
 ├── sync/                    # Google Drive integration
-└── data/                    # Local database (auto-generated)
+├── locales/                 # Translation files (en.json, pt.json)
+└── data/                    # Local database and config (auto-generated)
 ```
 
 ## Local data
