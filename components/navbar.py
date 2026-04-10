@@ -3,7 +3,7 @@ from i18n import t
 
 
 class NavBar(ft.NavigationRail):
-    ROUTES = ["/", "/transactions", "/categories", "/investments", "/settings"]
+    ROUTES = ["/", "/transactions", "/categories", "/investments", "/ideal_months", "/settings"]
 
     def __init__(self, page: ft.Page):
         self._page = page
@@ -41,6 +41,11 @@ class NavBar(ft.NavigationRail):
                 icon=ft.Icons.SHOW_CHART_OUTLINED,
                 selected_icon=ft.Icons.SHOW_CHART,
                 label=t("nav.investments"),
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.Icons.TUNE_OUTLINED,
+                selected_icon=ft.Icons.TUNE,
+                label=t("nav.ideal_months"),
             ),
             ft.NavigationRailDestination(
                 icon=ft.Icons.SETTINGS_OUTLINED,

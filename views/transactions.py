@@ -5,6 +5,18 @@ from controllers.transaction_ctrl import add_transaction, remove_transaction
 from i18n import t
 
 
+def _open_dialog(page, dlg):
+    if dlg not in page.overlay:
+        page.overlay.append(dlg)
+    dlg.open = True
+    page.update()
+
+
+def _close_dialog(page, dlg):
+    dlg.open = False
+    page.update()
+
+
 def _fmt_amount(amount: float, type_: str) -> str:
     signal = "+" if type_ == "income" else "-"
     return f"{signal} R$ {amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -189,10 +201,10 @@ class _TransactionForm:
         )
 
     def open(self):
-        self._page.open(self._dlg)
+        _open_dialog(self._page, self._dlg)
 
     def _close(self):
-        self._page.close(self._dlg)
+        _close_dialog(self._page, self._dlg)
 
     def _save(self, e):
         try:

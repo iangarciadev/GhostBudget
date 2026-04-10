@@ -3,6 +3,18 @@ from state import AppState
 from controllers.category_ctrl import add_category, edit_category, remove_category
 from i18n import t
 
+
+def _open_dialog(page, dlg):
+    if dlg not in page.overlay:
+        page.overlay.append(dlg)
+    dlg.open = True
+    page.update()
+
+
+def _close_dialog(page, dlg):
+    dlg.open = False
+    page.update()
+
 MATERIAL_ICONS = [
     "restaurant", "directions_car", "home", "health_and_safety",
     "sports_esports", "school", "more_horiz", "payments", "work",
@@ -168,10 +180,10 @@ class _CategoryForm:
         )
 
     def open(self):
-        self._page.open(self._dlg)
+        _open_dialog(self._page, self._dlg)
 
     def _close(self):
-        self._page.close(self._dlg)
+        _close_dialog(self._page, self._dlg)
 
     def _save(self, e):
         name = self._name.value.strip()

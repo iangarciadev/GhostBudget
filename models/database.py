@@ -50,6 +50,22 @@ def init_db() -> None:
                 date          TEXT    NOT NULL,
                 created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS ideal_months (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                name        TEXT    NOT NULL UNIQUE,
+                description TEXT,
+                created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS ideal_month_items (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ideal_month_id  INTEGER NOT NULL REFERENCES ideal_months(id) ON DELETE CASCADE,
+                category_id     INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+                amount          REAL    NOT NULL,
+                type            TEXT    NOT NULL CHECK(type IN ('income', 'expense')),
+                created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+            );
         """)
         _seed_default_categories(conn)
 

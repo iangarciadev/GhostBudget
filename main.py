@@ -7,6 +7,7 @@ from views.dashboard import DashboardView
 from views.transactions import TransactionsView
 from views.categories import CategoriesView
 from views.investments import InvestmentsView
+from views.ideal_months import IdealMonthsView
 from views.settings import SettingsView
 
 
@@ -35,10 +36,9 @@ def main(page: ft.Page):
         render(page.route)
 
     def on_lang_change():
-        """Chamado quando o usuário troca o idioma — atualiza navbar e re-renderiza."""
+        """Chamado quando o usuário troca o idioma — atualiza navbar."""
         state.language = i18n.get_current_language()
         navbar.refresh()
-        render(page.route)
 
     def render(route: str):
         navbar.sync_route(route)
@@ -60,6 +60,10 @@ def main(page: ft.Page):
             case "/investments":
                 content_area.controls.append(
                     InvestmentsView(page, state, on_data_change)
+                )
+            case "/ideal_months":
+                content_area.controls.append(
+                    IdealMonthsView(page, state, on_data_change)
                 )
             case "/settings":
                 content_area.controls.append(

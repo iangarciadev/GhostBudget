@@ -147,6 +147,7 @@ class SettingsView(ft.Column):
     def _change_language(self, e):
         i18n.load_language(e.control.value)
         self._on_lang_change()
+        self.refresh()
 
     def refresh(self):
         self._build()
