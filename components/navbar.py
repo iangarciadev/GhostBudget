@@ -17,6 +17,10 @@ class NavBar(ft.NavigationRail):
             min_width=80,
             bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
             on_change=on_change,
+            leading=ft.Container(
+                content=ft.Image(src="logo.png", width=48, height=48),
+                padding=ft.padding.symmetric(vertical=12),
+            ),
             destinations=self._build_destinations(),
         )
 

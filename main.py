@@ -20,6 +20,7 @@ def main(page: ft.Page):
     page.window.min_width = 700
     page.window.min_height = 500
     page.padding = 0
+    page.window.icon = "logo.png"
 
     i18n.init()
     init_db()
@@ -99,4 +100,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(target=main, assets_dir="assets")
