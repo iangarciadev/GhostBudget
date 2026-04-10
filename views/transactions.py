@@ -189,7 +189,7 @@ class _TransactionForm:
             hint_text=t("transactions.form.date_hint"),
         )
         self._type_toggle = ft.SegmentedButton(
-            selected={"expense"},
+            selected=["expense"],
             segments=[
                 ft.Segment(value="expense", label=ft.Text(t("transactions.form.type_expense"))),
                 ft.Segment(value="income", label=ft.Text(t("transactions.form.type_income"))),
